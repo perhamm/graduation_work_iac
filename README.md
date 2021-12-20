@@ -45,7 +45,7 @@ terraform apply -var="gitlab_runner_registration_token=token" -var="project_id=s
 
 ```gcloud container clusters get-credentials gke-prod-cluster```
 
-Его значение в base64 отправляем в переменную $KUBECONFIG проекта graduation_work
+Его значение в base64 отправляем в переменную $K8S_CONFIG проекта graduation_work
 
 ```cat ~/.kube/config  | base64 -w0```
 
