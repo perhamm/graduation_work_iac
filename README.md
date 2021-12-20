@@ -39,4 +39,14 @@ terraform apply -var="gitlab_runner_registration_token=token" -var="project_id=s
 
 Вносим ```cat terraform.json  | base64 -w0``` в переменную $SERVICEACCOUNT проекта graduation_work_iac в разделе CI/CD настроек. Тудаже вносим PROJECTID, например, s015937-335713, и RUNNER_TOKEN. На этом этапе, если появился раннер в настройках - пайпланы должны заработать.
 
+Включаем наш раннер в проекте graduation_work ( enable for this project)
+
+Делаем экспорт kubectl config
+
+```gcloud container clusters get-credentials gke-prod-cluster```
+
+Его значение в base64 отправляем в переменную $KUBECONFIG проекта graduation_work
+
+```cat ~/.kube/config  | base64 -w0```
+
 Все удалить - terraform destroy и удалить раннер из списка раннеров. Затем удалить баскет, и затем - отключить проект.
