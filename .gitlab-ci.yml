@@ -24,7 +24,7 @@ validate:
 plan:
    stage: plan
    script:
-     - terraform plan -out "planfile"
+     - terraform plan -out "planfile" -var="gitlab_runner_registration_token=$RUNNER_TOKEN" -var="project_id=$PROJECTID"
    dependencies:
      - validate
    artifacts:
@@ -34,7 +34,7 @@ plan:
 apply:
    stage: apply
    script:
-     - terraform apply -input=false "planfile"
+     - terraform apply -input=false "planfile" -var="gitlab_runner_registration_token=$RUNNER_TOKEN" -var="project_id=$PROJECTID"
    dependencies:
      - plan
    when: manual
