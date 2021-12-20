@@ -24,3 +24,5 @@ gcloud config set compute/region europe-west3
 ```
 
 Вносим ```cat terraform.json  | base64 -w0``` в переменную $SERVICEACCOUNT проекта graduation_work_iac в разделе CI/CD настроек.
+
+Для доступ по ssh к гитлаб-раннеру проще всего провалиться в него через ```gcloud compute ssh  gitlab-runner```
