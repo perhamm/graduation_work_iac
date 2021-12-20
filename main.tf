@@ -76,4 +76,5 @@ module "vds" {
   vpc_name              = "${module.vpc.vpc_name}"
   subnet_name           = "${module.subnet.subnet_name}"
   vmname                = "${var.vmname}"  
+  gitlab_runner_registration_token = "${var.gitlab_runner_registration_token}"
 }
