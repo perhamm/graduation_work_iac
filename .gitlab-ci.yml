@@ -8,7 +8,7 @@ before_script:
   -  rm -rf .terraform
   -  terraform --version
   -  echo $SERVICEACCOUNT
-  -  echo $SERVICEACCOUNT | base64 -d > .terraform.json
+  -  echo $SERVICEACCOUNT | base64 -d > terraform.json
   -  terraform init
 
 stages:
