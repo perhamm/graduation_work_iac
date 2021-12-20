@@ -5,3 +5,4 @@
 .terraform
 tfplan
 terraform.json
+.terraform.lock.hcl
