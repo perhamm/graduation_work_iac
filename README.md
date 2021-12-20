@@ -23,6 +23,16 @@ gcloud config set compute/region europe-west3
 
 ```
 
+Первое применение терраформа - с локального компа - 
+
+```
+terraform init
+terraform plan -var="gitlab_runner_registration_token=token"
+terraform aaply -var="gitlab_runner_registration_token=token"
+```
+
+Для доступа по ssh к гитлаб-раннеру, если он нужен по каким-либо причинам, проще всего провалиться в него через ```gcloud compute ssh  gitlab-runner```
+
 Вносим ```cat terraform.json  | base64 -w0``` в переменную $SERVICEACCOUNT проекта graduation_work_iac в разделе CI/CD настроек.
 
-Для доступ по ssh к гитлаб-раннеру проще всего провалиться в него через ```gcloud compute ssh  gitlab-runner```
+
