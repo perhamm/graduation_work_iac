@@ -29,7 +29,7 @@ resource "google_compute_instance" "vm" {
   sudo apt-get install docker-ce docker-ce-cli containerd.io -y
   curl -LJO "https://gitlab-runner-downloads.s3.amazonaws.com/latest/deb/gitlab-runner_amd64.deb"
   dpkg -i gitlab-runner_amd64.deb
-  gitlab-runner register   --non-interactive   --url "https://gitlab.com/"   --registration-token "${var.gitlab_runner_registration_token}"   --executor "docker"   --docker-image alpine:latest   --description "docker-runner"   --tag-list "docker"   --run-untagged="true"   --locked="false"   --access-level="not_protected"
+  gitlab-runner register   --non-interactive   --url "https://gitlab.com/"   --registration-token "${var.gitlab_runner_registration_token}"   --executor "docker"   --docker-image alpine:latest   --description "docker-runner"   --tag-list "docker"   --run-untagged="true"   --locked="false"   --access-level="not_protected" --docker-volumes /var/run/docker.sock:/var/run/docker.sock
   EOF
 }
 
