@@ -37,4 +37,4 @@ terraform apply -var="gitlab_runner_registration_token=token" -var="project_id=s
 
 Вносим ```cat terraform.json  | base64 -w0``` в переменную $SERVICEACCOUNT проекта graduation_work_iac в разделе CI/CD настроек.
 
-
+Все удалить - terraform destroy и удалить раннер из списка раннеров. Затем удалить баскет, и затем - отключить проект.
