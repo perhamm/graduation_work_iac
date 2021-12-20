@@ -103,3 +103,9 @@ variable "vmname" {
   description = "gitlab-runner"
   type = string
 }
+
+variable "gitlab_runner_registration_token" {
+  default     = ""
+  description = "gitlab_runner_registration_token"
+  type = string
+}

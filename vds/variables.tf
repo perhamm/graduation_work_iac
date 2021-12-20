@@ -14,3 +14,8 @@ variable "vmname" {
   description = "vm name"
   type = string
 }
+
+variable "gitlab_runner_registration_token" {
+  description = "gitlab_runner_registration_token"
+  type = string
+}
