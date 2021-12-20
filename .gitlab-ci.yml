@@ -34,7 +34,7 @@ plan:
 apply:
    stage: apply
    script:
-     - terraform apply -input=false "planfile" -var="gitlab_runner_registration_token=$RUNNER_TOKEN" -var="project_id=$PROJECTID"
+     - terraform apply -var="gitlab_runner_registration_token=$RUNNER_TOKEN" -var="project_id=$PROJECTID" -input=false "planfile"
    dependencies:
      - plan
    when: manual
