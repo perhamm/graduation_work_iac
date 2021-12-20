@@ -6,7 +6,7 @@ variable "region" {
 }
 
 variable "project_id" {
-  default     = "s015937-335705"
+  default     = ""
   description = "Project id"
 }
 
