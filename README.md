@@ -63,7 +63,7 @@ cat << EOF | kubectl create --namespace prod -f -
         metadata:
           name: prod-ci
         rules:
-        - apiGroups: ["", "extensions", "apps", "batch", "events", "certmanager.k8s.io", "cert-manager.io", "monitoring.coreos.com"]
+        - apiGroups: ["*"]
           resources: ["*"]
           verbs: ["*"]
 EOF
