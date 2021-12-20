@@ -24,7 +24,9 @@ gcloud config set compute/region europe-west3
 ```
 
 Первое применение терраформа - с локального компа.
+
 Сначала создать баскет в Cloud Storage с именем s015937-terraform-state
+
 Взять токен из раздела настроек раннеров, отключить шаренные раннеры.
 
 ```
@@ -35,6 +37,6 @@ terraform apply -var="gitlab_runner_registration_token=token" -var="project_id=s
 
 Для доступа по ssh к гитлаб-раннеру, если он нужен по каким-либо причинам, проще всего провалиться в него через ```gcloud compute ssh  gitlab-runner```
 
-Вносим ```cat terraform.json  | base64 -w0``` в переменную $SERVICEACCOUNT проекта graduation_work_iac в разделе CI/CD настроек.
+Вносим ```cat terraform.json  | base64 -w0``` в переменную $SERVICEACCOUNT проекта graduation_work_iac в разделе CI/CD настроек. На этом этапе, если появился раннер в настройках - пайпланы должны заработать.
 
 Все удалить - terraform destroy и удалить раннер из списка раннеров. Затем удалить баскет, и затем - отключить проект.
