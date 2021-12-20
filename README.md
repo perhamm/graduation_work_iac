@@ -45,8 +45,34 @@ terraform apply -var="gitlab_runner_registration_token=token" -var="project_id=s
 
 ```gcloud container clusters get-credentials gke-prod-cluster```
 
-Его значение в base64 отправляем в переменную $K8S_CONFIG проекта graduation_work
+Узнаем точку входа
 
-```cat ~/.kube/config  | base64 -w0```
+```kubectl cluster-info```
+
+Добавляем её в K8S_API_URL в проекте graduation_work
+
+Создаем аккаунт для входа
+```
+kubectl create namespace prod
+
+kubectl create serviceaccount --namespace prod ci
+
+cat << EOF | kubectl create --namespace prod -f -
+        apiVersion: rbac.authorization.k8s.io/v1
+        kind: Role
+        metadata:
+          name: prod-ci
+        rules:
+        - apiGroups: ["", "extensions", "apps", "batch", "events", "certmanager.k8s.io", "cert-manager.io", "monitoring.coreos.com"]
+          resources: ["*"]
+          verbs: ["*"]
+EOF
+
+kubectl create rolebinding --namespace prod --serviceaccount prod:ci --role prod-ci prod-ci-binding
+
+kubectl get secret --namespace prod $( kubectl get serviceaccount --namespace prod ci -o jsonpath='{.secrets[].name}' ) -o jsonpath='{.data.token}' | base64 -d
+
+```
+Добавляем токен в K8S_CI_TOKEN в проекте graduation_work
 
 Все удалить - terraform destroy и удалить раннер из списка раннеров. Затем удалить баскет, и затем - отключить проект.
