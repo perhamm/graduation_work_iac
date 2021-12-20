@@ -25,11 +25,12 @@ gcloud config set compute/region europe-west3
 
 Первое применение терраформа - с локального компа.
 Сначала создать баскет в Cloud Storage с именем s015937-terraform-state
+Взять токен из раздела настроек раннеров, отключить шаренные раннеры.
 
 ```
 terraform init
-terraform plan -var="gitlab_runner_registration_token=token"
-terraform apply -var="gitlab_runner_registration_token=token"
+terraform plan -var="gitlab_runner_registration_token=token" -var="project_id=s015937-335713"
+terraform apply -var="gitlab_runner_registration_token=token" -var="project_id=s015937-335713"
 ```
 
 Для доступа по ssh к гитлаб-раннеру, если он нужен по каким-либо причинам, проще всего провалиться в него через ```gcloud compute ssh  gitlab-runner```
