@@ -91,7 +91,7 @@ variable "gke_num_nodes" {
 }
 
 variable "gke_node_machine_type" {
-  default     = "n1-standard-2"
+  default     = "n1-standard-4"
 }
 
 variable "gke_label" {

@@ -18,8 +18,8 @@ resource "google_sql_database_instance" "master" {
     disk_autoresize   = false
 
     ip_configuration {
-      ipv4_enabled = false
-      private_network = "${var.vpc_link}"
+      ipv4_enabled = true
+      #private_network = "${var.vpc_link}"
       require_ssl  = "${var.sql_require_ssl}"
       authorized_networks {
         name  = "all"
@@ -61,8 +61,8 @@ resource "google_sql_database_instance" "replica" {
     disk_autoresize = false
 
     ip_configuration {
-      ipv4_enabled = false
-      private_network = "${var.vpc_link}"
+      ipv4_enabled = true
+      #private_network = "${var.vpc_link}"
       require_ssl  = "${var.sql_require_ssl}"
       authorized_networks {
         name  = "all"

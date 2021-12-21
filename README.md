@@ -149,7 +149,7 @@ kubectl create secret generic cloudsql-instance-credentials \
 
 ```
 
-Также необходимо предсоздать БД для приложения - делать нужно с VM раннера, предварительно поставив psql ( БД доступна только во внутренней сети )
+Также необходимо предсоздать БД для приложения - например, с VM раннера, предварительно поставив psql 
 
 ```
 gcloud compute ssh  gitlab-runner
@@ -198,6 +198,10 @@ helm upgrade --install graduationapp .helm -f .helm/values.yaml --namespace prod
 
 ```
 kubectl run -t -i --rm --image centosadmin/utils test bash -n prod
+apk --update add redis
+apk --update add postgresql-client
+psql -h yelb-db --username postgres -W
+
 ```
 
 Все удалить - terraform destroy и удалить раннер из списка раннеров. Иногда подзалипает удаление SQL - удаляем из консоли, затем, например
