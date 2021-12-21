@@ -103,7 +103,7 @@ cat << EOF | kubectl create --namespace prod -f -
         metadata:
           name: prod-ci
         rules:
-        - apiGroups: ["*"]
+        - apiGroups: ["", "extensions", "apps", "batch", "events", "certmanager.k8s.io", "cert-manager.io", "monitoring.coreos.com", "networking.k8s.io"]
           resources: ["*"]
           verbs: ["*"]
 EOF
@@ -114,6 +114,12 @@ kubectl get secret --namespace prod $( kubectl get serviceaccount --namespace pr
 
 ```
 Добавляем токен в K8S_CI_TOKEN в проекте graduation_work
+
+Проверить токен можно так
+
+```
+kubectl get pods --as=system:serviceaccount:prod:ci -n prod
+```
 
 Settings > Repository в репо приложения находим Deploy tokens и нажимаем Expand.
 
