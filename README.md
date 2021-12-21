@@ -17,7 +17,7 @@
 ```
 gcloud config set project s015937-335713
 gcloud auth activate-service-account --key-file=terraform.json
-gcloud services enable compute.googleapis.com  container.googleapis.com  sql-component.googleapis.com sqladmin.googleapis.com  servicenetworking.googleapis.com cloudresourcemanager.googleapis.com
+gcloud services enable compute.googleapis.com  container.googleapis.com  sql-component.googleapis.com sqladmin.googleapis.com  servicenetworking.googleapis.com cloudresourcemanager.googleapis.com dns.googleapis.com
 gcloud config set compute/zone europe-west3-a
 gcloud config set compute/region europe-west3
 
@@ -75,4 +75,38 @@ kubectl get secret --namespace prod $( kubectl get serviceaccount --namespace pr
 ```
 Добавляем токен в K8S_CI_TOKEN в проекте graduation_work
 
-Все удалить - terraform destroy и удалить раннер из списка раннеров. Затем удалить баскет, и затем - отключить проект.
+Ставим в класетр ingress
+
+```
+
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
+
+kubectl create ns nginx
+
+helm install nginx ingress-nginx/ingress-nginx --namespace nginx --set rbac.create=true --set controller.publishService.enabled=true
+
+```
+
+Ставим cert-manager
+
+```
+kubectl apply --validate=false -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.12/deploy/manifests/00-crds.yaml
+
+kubectl create namespace cert-manager
+
+helm repo add jetstack https://charts.jetstack.io
+
+helm repo update
+
+helm install cert-manager \
+ --namespace cert-manager \
+ --version v0.12.0 \
+ --set ingressShim.defaultIssuerName=letsencrypt \
+ --set ingressShim.defaultIssuerKind=ClusterIssuer \
+ jetstack/cert-manager
+
+
+```
+
+Все удалить - terraform destroy и удалить раннер из списка раннеров. Чтобы совсем окончательно все удадить - удалить баскет, и затем - отключить проект.
