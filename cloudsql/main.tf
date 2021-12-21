@@ -52,6 +52,7 @@ resource "google_sql_database_instance" "replica" {
   region               = "${var.region}"
   database_version     = "POSTGRES_10"
   master_instance_name = "${google_sql_database_instance.master.name}"
+   deletion_protection = false
 
   settings {
     tier            = "${var.sql_instance_size}"
@@ -59,6 +60,19 @@ resource "google_sql_database_instance" "replica" {
     disk_size       = "${var.sql_disk_size}"
     disk_autoresize = false
 
+    ip_configuration {
+      ipv4_enabled = false
+      private_network = "${var.vpc_link}"
+      require_ssl  = "${var.sql_require_ssl}"
+      authorized_networks {
+        name  = "all"
+        value = "0.0.0.0/0"
+      }
+
+
+      
+    }
+    
     location_preference {
       zone = "${var.region}-${var.sql_replica_zone}"
     }

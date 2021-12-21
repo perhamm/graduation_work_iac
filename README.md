@@ -75,8 +75,6 @@ kubectl get secret --namespace prod $( kubectl get serviceaccount --namespace pr
 ```
 Добавляем токен в K8S_CI_TOKEN в проекте graduation_work
 
-Также добавляем SQL_HOST (Private IP address) и пароль юзера postgres SQL_PASS в graduation_work
-
 Ставим в класетр ingress
 
 ```
@@ -136,6 +134,20 @@ k8s-pull-token
 ```
 kubectl create secret docker-registry gitlab-registry --docker-server registry.gitlab.com --docker-email 'fyvaoldg@gmail.com' --docker-username '<первая строчка из окна создания токена в gitlab>' --docker-password '<вторая строчка из окна создания токена в gitlab>' --namespace prod
 ```
+Создаем секрет для бд а также секрет с ключом от сервисного ака терраформа для sql proxy 
+
+```
+kubectl create secret generic db \
+  --from-literal=username=postgres \
+  --from-literal=password=<YOUR-DATABASE-PASSWORD> \
+  --from-literal=connectionname=<YOUR-INSTANCE_CONNECTION_NAME> \
+  -n prod
+
+kubectl create secret generic cloudsql-instance-credentials \
+--from-file=terraform.json=terraform.json \
+-n prod
+
+```
 
 Также необходимо предсоздать БД для приложения - делать нужно с VM раннера, предварительно поставив psql ( БД доступна только во внутренней сети )
 
@@ -144,7 +156,7 @@ gcloud compute ssh  gitlab-runner
 sudo -i
 apt install postgresql-client-common postgresql-client -y
 
-psql -v ON_ERROR_STOP=1 -h <ip bd> --username postgres -W <<-EOSQL
+psql -v ON_ERROR_STOP=1 -h <HOST> --username postgres -W <<-EOSQL
     CREATE DATABASE yelbdatabase;
     \connect yelbdatabase;
 	CREATE TABLE restaurants (
@@ -166,11 +178,6 @@ K8S_API_URL
 
 K8S_CI_TOKEN
 
-SQL_HOST
-
-SQL_PASS
-
-
 graduation_work_iac: 
 
 PROJECTID
@@ -184,18 +191,13 @@ SQL_PASS
 Проверяем, сделав пробный запуск (id image берем после первого успешного запуска пайплана graduation_work)
 
 ```
-helm upgrade --install graduation_work .helm 
-        --set image_yelb_app=registry.gitlab.com/perhamm/graduation_work 
-        --set imageTag_yelb_app=main.433761190.yyelb-appserver 
-        --set image_yelb_ui=registry.gitlab.com/perhamm/graduation_work 
-        --set imageTag_yelb_ui=main.433761190.yelb-ui 
-        --set sql_host 10.206.64.3
-        --set sql_password blablabla
-        --wait 
-        --timeout 300s 
-        --atomic 
-        --debug 
-        --namespace prod
+helm upgrade --install graduationapp .helm -f .helm/values.yaml --namespace prod
+
+```
+Если нужна диагностика - можно запустить под внутри кластера
+
+```
+kubectl run -t -i --rm --image centosadmin/utils test bash -n prod
 ```
 
 Все удалить - terraform destroy и удалить раннер из списка раннеров. Иногда подзалипает удаление SQL - удаляем из консоли, затем, например
