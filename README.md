@@ -99,7 +99,7 @@ kubectl create serviceaccount --namespace prod ci
 
 cat << EOF | kubectl create --namespace prod -f -
         apiVersion: rbac.authorization.k8s.io/v1
-        kind: Role
+        kind: ClusterRole
         metadata:
           name: prod-ci
         rules:
@@ -108,7 +108,7 @@ cat << EOF | kubectl create --namespace prod -f -
           verbs: ["*"]
 EOF
 
-kubectl create rolebinding --namespace prod --serviceaccount prod:ci --role prod-ci prod-ci-binding
+kubectl create clusterrolebinding --namespace prod --serviceaccount prod:ci --clusterrole prod-ci prod-ci-binding
 
 kubectl get secret --namespace prod $( kubectl get serviceaccount --namespace prod ci -o jsonpath='{.secrets[].name}' ) -o jsonpath='{.data.token}' | base64 -d
 
@@ -118,7 +118,8 @@ kubectl get secret --namespace prod $( kubectl get serviceaccount --namespace pr
 Проверить токен можно так
 
 ```
-kubectl get pods --as=system:serviceaccount:prod:ci -n prod
+kubectl get clusterissuers --as=system:serviceaccount:prod:ci -n prod
+
 ```
 
 Settings > Repository в репо приложения находим Deploy tokens и нажимаем Expand.
