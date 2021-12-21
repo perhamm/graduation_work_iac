@@ -75,6 +75,8 @@ kubectl get secret --namespace prod $( kubectl get serviceaccount --namespace pr
 ```
 Добавляем токен в K8S_CI_TOKEN в проекте graduation_work
 
+Также добавляем SQL_HOST (Private IP address) и пароль юзера postgres SQL_PASS в graduation_work
+
 Ставим в класетр ingress
 
 ```
@@ -109,6 +111,12 @@ helm install cert-manager \
 
 ```
 
+После создания ингресс контроллера смотрим ip лоад балансера - и заносим ip как А запись в днс своего домена.
+```
+kubectl get service -A
+nginx          nginx-ingress-nginx-controller             LoadBalancer   10.103.250.72    34.159.44.133
+```
+
 Settings > Repository в репо приложения находим Deploy tokens и нажимаем Expand.
 
 В поле Name вводим
@@ -129,10 +137,14 @@ k8s-pull-token
 kubectl create secret docker-registry gitlab-registry --docker-server registry.gitlab.com --docker-email 'fyvaoldg@gmail.com' --docker-username '<первая строчка из окна создания токена в gitlab>' --docker-password '<вторая строчка из окна создания токена в gitlab>' --namespace prod
 ```
 
-Также необходимо предсоздать БД для приложения
+Также необходимо предсоздать БД для приложения - делать нужно с VM раннера, предварительно поставив psql ( БД доступна только во внутренней сети )
 
 ```
-psql -v ON_ERROR_STOP=1 --username postgres <<-EOSQL
+gcloud compute ssh  gitlab-runner
+sudo -i
+apt install postgresql-client-common postgresql-client -y
+
+psql -v ON_ERROR_STOP=1 -h <ip bd> --username postgres -W <<-EOSQL
     CREATE DATABASE yelbdatabase;
     \connect yelbdatabase;
 	CREATE TABLE restaurants (
@@ -146,4 +158,50 @@ psql -v ON_ERROR_STOP=1 --username postgres <<-EOSQL
 	INSERT INTO restaurants (name, count) VALUES ('ihop', 0);
 EOSQL
 ```
-Все удалить - terraform destroy и удалить раннер из списка раннеров. Чтобы совсем окончательно все удадить - удалить баскет, и затем - отключить проект.
+Итого, должны быть следущие переменные:
+
+graduation_work:
+
+K8S_API_URL
+
+K8S_CI_TOKEN
+
+SQL_HOST
+
+SQL_PASS
+
+
+graduation_work_iac: 
+
+PROJECTID
+
+RUNNER_TOKEN
+
+SERVICEACCOUNT
+
+SQL_PASS
+
+Проверяем, сделав пробный запуск (id image берем после первого успешного запуска пайплана graduation_work)
+
+```
+helm upgrade --install graduation_work .helm 
+        --set image_yelb_app=registry.gitlab.com/perhamm/graduation_work 
+        --set imageTag_yelb_app=main.433761190.yyelb-appserver 
+        --set image_yelb_ui=registry.gitlab.com/perhamm/graduation_work 
+        --set imageTag_yelb_ui=main.433761190.yelb-ui 
+        --set sql_host 10.206.64.3
+        --set sql_password blablabla
+        --wait 
+        --timeout 300s 
+        --atomic 
+        --debug 
+        --namespace prod
+```
+
+Все удалить - terraform destroy и удалить раннер из списка раннеров. Иногда подзалипает удаление SQL - удаляем из консоли, затем, например
+```
+terraform state list
+terraform state rm module.cloudsql.google_sql_user.user
+terraform destroy
+```
+ Чтобы совсем окончательно все удадить - удалить баскет, и затем - отключить проект.

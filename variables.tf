@@ -35,7 +35,7 @@ variable "availability_type" {
 }
 
 variable "sql_instance_size" {
-  default     = "db-custom-1-3840"
+  default     = "db-f1-micro"
   description = "Size of Cloud SQL instances"
 }
 
@@ -59,10 +59,10 @@ variable "sql_master_zone" {
   description = "Zone of the Cloud SQL master (a, b, ...)"
 }
 
-# variable "sql_replica_zone" {
-#   default     = "b"
-#   description = "Zone of the Cloud SQL replica (a, b, ...)"
-# }
+variable "sql_replica_zone" {
+  default     = "b"
+  description = "Zone of the Cloud SQL replica (a, b, ...)"
+}
 
 variable "sql_connect_retry_interval" {
   default     = 60
@@ -91,7 +91,7 @@ variable "gke_num_nodes" {
 }
 
 variable "gke_node_machine_type" {
-  default     = "n1-standard-1"
+  default     = "n1-standard-4"
 }
 
 variable "gke_label" {
