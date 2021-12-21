@@ -31,13 +31,13 @@ gcloud config set compute/region europe-west3
 
 ```
 terraform init
-terraform plan -var="gitlab_runner_registration_token=token" -var="project_id=s015937-335713"
-terraform apply -var="gitlab_runner_registration_token=token" -var="project_id=s015937-335713"
+terraform plan -var="gitlab_runner_registration_token=token" -var="project_id=s015937-335713" -var="sql_pass=password"
+terraform apply -var="gitlab_runner_registration_token=token" -var="project_id=s015937-335713" -var="sql_pass=password"
 ```
 
 Для доступа по ssh к гитлаб-раннеру, если он нужен по каким-либо причинам, проще всего провалиться в него через ```gcloud compute ssh  gitlab-runner```
 
-Вносим ```cat terraform.json  | base64 -w0``` в переменную $SERVICEACCOUNT проекта graduation_work_iac в разделе CI/CD настроек. Тудаже вносим PROJECTID, например, s015937-335713, и RUNNER_TOKEN. На этом этапе, если появился раннер в настройках - пайпланы должны заработать.
+Вносим ```cat terraform.json  | base64 -w0``` в переменную $SERVICEACCOUNT проекта graduation_work_iac в разделе CI/CD настроек. Тудаже вносим PROJECTID, например, s015937-335713, RUNNER_TOKEN и пароль юзера postgres SQL_PASS. На этом этапе, если появился раннер в настройках - пайпланы должны заработать.
 
 Включаем наш раннер в проекте graduation_work ( enable for this project)
 
@@ -109,4 +109,41 @@ helm install cert-manager \
 
 ```
 
+Settings > Repository в репо приложения находим Deploy tokens и нажимаем Expand.
+
+В поле Name вводим
+
+k8s-pull-token
+
+И ставим галочку рядом с read_registry.
+
+Все остальные поля оставляем пустыми.
+
+Нажимаем Create deploy token.
+
+НЕ ЗАКРЫВАЕМ ОКНО БРАУЗЕРА!
+
+Создаем image pull secret - для того, чтобы наш кластер Kubernetes мог получать образы из registry gitlab'а.
+
+```
+kubectl create secret docker-registry gitlab-registry --docker-server registry.gitlab.com --docker-email 'fyvaoldg@gmail.com' --docker-username '<первая строчка из окна создания токена в gitlab>' --docker-password '<вторая строчка из окна создания токена в gitlab>' --namespace prod
+```
+
+Также необходимо предсоздать БД для приложения
+
+```
+psql -v ON_ERROR_STOP=1 --username postgres <<-EOSQL
+    CREATE DATABASE yelbdatabase;
+    \connect yelbdatabase;
+	CREATE TABLE restaurants (
+    	name        char(30),
+    	count       integer,
+    	PRIMARY KEY (name)
+	);
+	INSERT INTO restaurants (name, count) VALUES ('outback', 0);
+	INSERT INTO restaurants (name, count) VALUES ('bucadibeppo', 0);
+	INSERT INTO restaurants (name, count) VALUES ('chipotle', 0);
+	INSERT INTO restaurants (name, count) VALUES ('ihop', 0);
+EOSQL
+```
 Все удалить - terraform destroy и удалить раннер из списка раннеров. Чтобы совсем окончательно все удадить - удалить баскет, и затем - отключить проект.

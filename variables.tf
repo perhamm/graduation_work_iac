@@ -73,7 +73,7 @@ variable "sql_user" {
 }
 
 variable "sql_pass" {
-  default     = "sqlsql123"
+  default     = ""
 }
 
 # GKE variables
