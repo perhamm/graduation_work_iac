@@ -51,30 +51,6 @@ terraform apply -var="gitlab_runner_registration_token=token" -var="project_id=s
 
 Добавляем её в K8S_API_URL в проекте graduation_work
 
-Создаем аккаунт для входа
-```
-kubectl create namespace prod
-
-kubectl create serviceaccount --namespace prod ci
-
-cat << EOF | kubectl create --namespace prod -f -
-        apiVersion: rbac.authorization.k8s.io/v1
-        kind: Role
-        metadata:
-          name: prod-ci
-        rules:
-        - apiGroups: ["*"]
-          resources: ["*"]
-          verbs: ["*"]
-EOF
-
-kubectl create rolebinding --namespace prod --serviceaccount prod:ci --role prod-ci prod-ci-binding
-
-kubectl get secret --namespace prod $( kubectl get serviceaccount --namespace prod ci -o jsonpath='{.secrets[].name}' ) -o jsonpath='{.data.token}' | base64 -d
-
-```
-Добавляем токен в K8S_CI_TOKEN в проекте graduation_work
-
 Ставим в класетр ingress
 
 ```
@@ -114,6 +90,30 @@ helm install cert-manager \
 kubectl get service -A
 nginx          nginx-ingress-nginx-controller             LoadBalancer   10.103.250.72    34.159.44.133
 ```
+
+Создаем аккаунт для входа
+```
+kubectl create namespace prod
+
+kubectl create serviceaccount --namespace prod ci
+
+cat << EOF | kubectl create --namespace prod -f -
+        apiVersion: rbac.authorization.k8s.io/v1
+        kind: Role
+        metadata:
+          name: prod-ci
+        rules:
+        - apiGroups: ["*"]
+          resources: ["*"]
+          verbs: ["*"]
+EOF
+
+kubectl create rolebinding --namespace prod --serviceaccount prod:ci --role prod-ci prod-ci-binding
+
+kubectl get secret --namespace prod $( kubectl get serviceaccount --namespace prod ci -o jsonpath='{.secrets[].name}' ) -o jsonpath='{.data.token}' | base64 -d
+
+```
+Добавляем токен в K8S_CI_TOKEN в проекте graduation_work
 
 Settings > Repository в репо приложения находим Deploy tokens и нажимаем Expand.
 
