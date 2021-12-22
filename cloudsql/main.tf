@@ -42,47 +42,47 @@ resource "google_sql_database_instance" "master" {
   }
 }
 
-resource "google_sql_database_instance" "replica" {
-  depends_on = [
-    google_sql_database_instance.master,
-  ]
+# resource "google_sql_database_instance" "replica" {
+#   depends_on = [
+#     google_sql_database_instance.master,
+#   ]
 
-  name                 = "${google_sql_database_instance.master.name}-replica"
-  count                = "1"
-  region               = "${var.region}"
-  database_version     = "POSTGRES_10"
-  master_instance_name = "${google_sql_database_instance.master.name}"
-   deletion_protection = false
+#   name                 = "${google_sql_database_instance.master.name}-replica"
+#   count                = "1"
+#   region               = "${var.region}"
+#   database_version     = "POSTGRES_10"
+#   master_instance_name = "${google_sql_database_instance.master.name}"
+#    deletion_protection = false
 
-  settings {
-    tier            = "${var.sql_instance_size}"
-    disk_type       = "${var.sql_disk_type}"
-    disk_size       = "${var.sql_disk_size}"
-    disk_autoresize = false
+#   settings {
+#     tier            = "${var.sql_instance_size}"
+#     disk_type       = "${var.sql_disk_type}"
+#     disk_size       = "${var.sql_disk_size}"
+#     disk_autoresize = false
 
-    ip_configuration {
-      ipv4_enabled = true
-      #private_network = "${var.vpc_link}"
-      require_ssl  = "${var.sql_require_ssl}"
-      authorized_networks {
-        name  = "all"
-        value = "0.0.0.0/0"
-      }
+#     ip_configuration {
+#       ipv4_enabled = true
+#       #private_network = "${var.vpc_link}"
+#       require_ssl  = "${var.sql_require_ssl}"
+#       authorized_networks {
+#         name  = "all"
+#         value = "0.0.0.0/0"
+#       }
 
 
       
-    }
+#     }
     
-    location_preference {
-      zone = "${var.region}-${var.sql_replica_zone}"
-    }
-  }
-}
+#     location_preference {
+#       zone = "${var.region}-${var.sql_replica_zone}"
+#     }
+#   }
+# }
 
 resource "google_sql_user" "user" {
   depends_on = [
     google_sql_database_instance.master,
-    google_sql_database_instance.replica,
+    # google_sql_database_instance.replica,
   ]
 
   instance = "${google_sql_database_instance.master.name}"

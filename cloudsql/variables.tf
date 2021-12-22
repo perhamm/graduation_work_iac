@@ -38,9 +38,9 @@ variable "sql_master_zone" {
   description = "Zone of the Cloud SQL master (a, b, ...)"
 }
 
-variable "sql_replica_zone" {
-  description = "Zone of the Cloud SQL replica (a, b, ...)"
-}
+# variable "sql_replica_zone" {
+#   description = "Zone of the Cloud SQL replica (a, b, ...)"
+# }
 
 variable "sql_user" {
   description = "Username of the host to access the database"

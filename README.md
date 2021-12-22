@@ -150,6 +150,8 @@ kubectl create secret generic db \
   --from-literal=connectionname=<YOUR-INSTANCE_CONNECTION_NAME> \
   -n prod
 
+#cd ../graduation_work_iac/
+
 kubectl create secret generic cloudsql-instance-credentials \
 --from-file=terraform.json=terraform.json \
 -n prod

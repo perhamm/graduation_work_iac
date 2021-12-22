@@ -30,9 +30,13 @@ variable "subnet_cidr" {
 # Cloud SQL variables
 
 variable "availability_type" {
-  default = "REGIONAL"
+  default = "ZONAL"
   description = "Availability type for HA"
 }
+# variable "availability_type" {
+#   default = "REGIONAL"
+#   description = "Availability type for HA"
+# }
 
 variable "sql_instance_size" {
   default     = "db-f1-micro"
@@ -91,7 +95,7 @@ variable "gke_num_nodes" {
 }
 
 variable "gke_node_machine_type" {
-  default     = "n1-standard-4"
+  default     = "n1-standard-2"
 }
 
 variable "gke_label" {
