@@ -27,7 +27,7 @@ vds - просто виртуалка под раннер, раннер став
 
 Итого получается следующая схема работы приложения:
 
-![https://app.diagrams.net/#G1wjkWXmV4_YDXgfPPr4mmVDzlUWYRkjDw](image/ciagram.png)
+![https://app.diagrams.net/#G1wjkWXmV4_YDXgfPPr4mmVDzlUWYRkjDw](image/diagram.png)
 
 
 ## Описание установки
