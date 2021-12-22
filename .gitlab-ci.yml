@@ -38,3 +38,6 @@ apply:
    dependencies:
      - plan
    when: manual
+   only:
+     - main
+
