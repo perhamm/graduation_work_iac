@@ -191,3 +191,5 @@ terraform state rm module.cloudsql.google_sql_user.user
 terraform destroy
 ```
  Чтобы совсем окончательно все удадить - удалить баскет, и затем - отключить проект.<br/>
+
+## Мониторинг и логи
