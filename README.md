@@ -1,78 +1,56 @@
-Перед запуском нужно установить раннер в облаке, следоватьльно, первый запуск необходимо провести с локального компьютера.
+## Описание установки
 
-Преполагается что gcloud, терраформ и kubectl установлен на этом самом локальном компьютере...
-
-Удалить все старые auth - 
-
-```gcloud auth revoke --all```
-
-В консоли облака - создать новый проект - s015937 
-
-У него будет уникальный id - например, s015937-335713
-
-Зайти в iam-admin/serviceaccounts - сделать новый сервис аккаунт, назвать его terrafrom, дать роль owner и создать для него ключ JSON.
-
-Этот ключ кинуть в корень скаченного репо под именем terraform.json
-
+### Создание проекта в GCP
+Перед запуском нужно установить раннер в облаке, следоватьльно, первый запуск необходимо провести с локального компьютера.<br/>
+Преполагается что gcloud, терраформ и kubectl установлен на этом самом локальном компьютере...<br/><br/>
+~~Просто заметка для себя - удалить все старые auth для чистого использования консольной gcloud можно так:~~<br/>
+~~```gcloud auth revoke --all```~~<br/><br/>
+В консоли облака - создать новый проект - s015937 <br/>
+У него будет уникальный id - например, s015937-335713<br/>
+Зайти в iam-admin/serviceaccounts - сделать новый сервис аккаунт, назвать его terrafrom, дать роль owner и создать для него ключ JSON.<br/>
+Этот ключ кинуть в корень скаченного репо graduation_work_iac под именем terraform.json<br/>
 ```
 gcloud config set project s015937-335713
 gcloud auth activate-service-account --key-file=terraform.json
 gcloud services enable compute.googleapis.com  container.googleapis.com  sql-component.googleapis.com sqladmin.googleapis.com  servicenetworking.googleapis.com cloudresourcemanager.googleapis.com dns.googleapis.com
 gcloud config set compute/zone europe-west3-a
 gcloud config set compute/region europe-west3
-
 ```
-
-Первое применение терраформа - с локального компа.
-
-Сначала создать баскет в Cloud Storage с именем s015937-terraform-state
-
-Взять токен из раздела настроек раннеров, отключить шаренные раннеры.
-
+Создать баскет в Cloud Storage с именем s015937-terraform-state<br/>
+### Первое применение терраформа
+Первое применение терраформа - с локального компа.<br/>
+Взять токен из раздела настроек раннеров, отключить шаренные раннеры, придумать сложный пароль для постгреса.<br/>
 ```
 terraform init
 terraform plan -var="gitlab_runner_registration_token=token" -var="project_id=s015937-335713" -var="sql_pass=password"
 terraform apply -var="gitlab_runner_registration_token=token" -var="project_id=s015937-335713" -var="sql_pass=password"
 ```
-
-Для доступа по ssh к гитлаб-раннеру, если он нужен по каким-либо причинам, проще всего провалиться в него через ```gcloud compute ssh  gitlab-runner```
-
-Вносим ```cat terraform.json  | base64 -w0``` в переменную $SERVICEACCOUNT проекта graduation_work_iac в разделе CI/CD настроек. Тудаже вносим PROJECTID, например, s015937-335713, RUNNER_TOKEN и пароль юзера postgres SQL_PASS. На этом этапе, если появился раннер в настройках - пайпланы должны заработать.
-
-Включаем наш раннер в проекте graduation_work ( enable for this project)
-
-Делаем экспорт kubectl config
-
-```gcloud container clusters get-credentials gke-prod-cluster```
-
-Узнаем точку входа
-
-```kubectl cluster-info```
-
-Добавляем её в K8S_API_URL в проекте graduation_work
-
-Ставим в класетр ingress
-
+### Настройки CI обоих репозиториев
+Для доступа по ssh к гитлаб-раннеру, если он нужен по каким-либо причинам, проще всего провалиться в него через <br/>
+```gcloud compute ssh  gitlab-runner```<br/>
+Вносим ```cat terraform.json  | base64 -w0``` в переменную **SERVICEACCOUNT** проекта graduation_work_iac в разделе CI/CD настроек. <br/>Тудаже вносим **PROJECTID**, например, s015937-335713, **RUNNER_TOKEN** и пароль юзера postgres **SQL_PASS**. <br/>На этом этапе, если появился раннер в настройках - пайпланы должны заработать.<br/>
+Включаем наш раннер в проекте graduation_work ( enable for this project)<br/>
+Делаем экспорт kubectl config<br/>
+```gcloud container clusters get-credentials gke-prod-cluster```<br/>
+Узнаем точку входа<br/>
+```kubectl cluster-info```<br/>
+Добавляем её в **K8S_API_URL** в проекте graduation_work<br/>
+### Настройки кластера для работы пайплайнов и приложения
+Ставим в класетр ingress<br/>
 ```
-
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm repo update
 
 kubectl create ns nginx
-
 helm install nginx ingress-nginx/ingress-nginx --namespace nginx --set rbac.create=true --set controller.publishService.enabled=true
 
 ```
-
-Ставим cert-manager
-
+Ставим cert-manager<br/>
 ```
 kubectl apply --validate=false -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.12/deploy/manifests/00-crds.yaml
-
 kubectl create namespace cert-manager
 
 helm repo add jetstack https://charts.jetstack.io
-
 helm repo update
 
 helm install cert-manager \
@@ -82,21 +60,16 @@ helm install cert-manager \
  --set ingressShim.defaultIssuerKind=ClusterIssuer \
  jetstack/cert-manager
 
-
 ```
-
-После создания ингресс контроллера смотрим ip лоад балансера - и заносим ip как А запись в днс своего домена.
+После создания ингресс контроллера смотрим ip лоад балансера - и заносим ip как А запись в днс своего домена.<br/>
 ```
 kubectl get service -A
 nginx          nginx-ingress-nginx-controller             LoadBalancer   10.103.250.72    34.159.44.133
 ```
-
-Создаем аккаунт для входа
+Создаем аккаунт для входа<br/>
 ```
 kubectl create namespace prod
-
 kubectl create serviceaccount --namespace prod ci
-
 cat << EOF | kubectl create --namespace prod -f -
         apiVersion: rbac.authorization.k8s.io/v1
         kind: ClusterRole
@@ -107,42 +80,24 @@ cat << EOF | kubectl create --namespace prod -f -
           resources: ["*"]
           verbs: ["*"]
 EOF
-
 kubectl create clusterrolebinding --namespace prod --serviceaccount prod:ci --clusterrole prod-ci prod-ci-binding
-
 kubectl get secret --namespace prod $( kubectl get serviceaccount --namespace prod ci -o jsonpath='{.secrets[].name}' ) -o jsonpath='{.data.token}' | base64 -d
-
 ```
-Добавляем токен в K8S_CI_TOKEN в проекте graduation_work
-
-Проверить токен можно так
-
+Добавляем токен в **K8S_CI_TOKEN** в проекте graduation_work<br/>
+Проверить токен можно так<br/>
 ```
 kubectl get clusterissuers --as=system:serviceaccount:prod:ci -n prod
-
 ```
-
-Settings > Repository в репо приложения находим Deploy tokens и нажимаем Expand.
-
-В поле Name вводим
-
-k8s-pull-token
-
-И ставим галочку рядом с read_registry.
-
-Все остальные поля оставляем пустыми.
-
-Нажимаем Create deploy token.
-
-НЕ ЗАКРЫВАЕМ ОКНО БРАУЗЕРА!
-
-Создаем image pull secret - для того, чтобы наш кластер Kubernetes мог получать образы из registry gitlab'а.
-
+Settings > Repository в репо приложения находим Deploy tokens и нажимаем Expand.<br/>
+В поле Name вводим k8s-pull-token и ставим галочку рядом с read_registry.<br/>
+Все остальные поля оставляем пустыми.<br/>
+Нажимаем Create deploy token.<br/>
+НЕ ЗАКРЫВАЕМ ОКНО БРАУЗЕРА!<br/>
+Создаем image pull secret - для того, чтобы наш кластер Kubernetes мог получать образы из registry gitlab'а.<br/>
 ```
 kubectl create secret docker-registry gitlab-registry --docker-server registry.gitlab.com --docker-email 'fyvaoldg@gmail.com' --docker-username '<первая строчка из окна создания токена в gitlab>' --docker-password '<вторая строчка из окна создания токена в gitlab>' --namespace prod
 ```
-Создаем секрет для бд а также секрет с ключом от сервисного ака терраформа для sql proxy 
-
+Создаем секрет для бд а также секрет с ключом от сервисного ака терраформа для sql proxy <br/>
 ```
 kubectl create secret generic db \
   --from-literal=username=postgres \
@@ -157,9 +112,7 @@ kubectl create secret generic cloudsql-instance-credentials \
 -n prod
 
 ```
-
-Также необходимо предсоздать БД для приложения - например, с VM раннера, предварительно поставив psql 
-
+Также необходимо предсоздать БД для приложения - например, с VM раннера, предварительно поставив psql <br/>
 ```
 gcloud compute ssh  gitlab-runner
 sudo -i
@@ -179,32 +132,20 @@ psql -v ON_ERROR_STOP=1 -h <HOST> --username postgres -W <<-EOSQL
 	INSERT INTO restaurants (name, count) VALUES ('ihop', 0);
 EOSQL
 ```
+### Проверка переменных и пробный запуск
 Итого, должны быть следущие переменные:
 
-graduation_work:
+**graduation_work**: K8S_API_URL K8S_CI_TOKEN
 
-K8S_API_URL
+**graduation_work_iac**: PROJECTID RUNNER_TOKEN SERVICEACCOUNT SQL_PASS
 
-K8S_CI_TOKEN
-
-graduation_work_iac: 
-
-PROJECTID
-
-RUNNER_TOKEN
-
-SERVICEACCOUNT
-
-SQL_PASS
-
-Проверяем, сделав пробный запуск (id image берем после первого успешного запуска пайплана graduation_work)
+Проверяем, сделав пробный запуск (ну или можно сразу запустить пайплайн проекта с приллжением)<br/>
 
 ```
 helm upgrade --install graduationapp .helm -f .helm/values.yaml --namespace prod
 
 ```
-Если нужна диагностика - можно запустить под внутри кластера
-
+Если нужна диагностика - можно запустить под внутри кластера<br/>
 ```
 kubectl run -t -i --rm --image centosadmin/utils test bash -n prod
 apk --update add redis
@@ -212,11 +153,11 @@ apk --update add postgresql-client
 psql -h yelb-db --username postgres -W
 
 ```
-
-Все удалить - terraform destroy и удалить раннер из списка раннеров. Иногда подзалипает удаление SQL - удаляем из консоли, затем, например
+### Удаление или частичное отключение
+Все удалить - terraform destroy и удалить раннер из списка раннеров. Иногда подзалипает удаление SQL - удаляем из консоли, затем, например<br/>
 ```
 terraform state list
 terraform state rm module.cloudsql.google_sql_user.user
 terraform destroy
 ```
- Чтобы совсем окончательно все удадить - удалить баскет, и затем - отключить проект.
+ Чтобы совсем окончательно все удадить - удалить баскет, и затем - отключить проект.<br/>
